@@ -2,7 +2,8 @@ const {Router} = require('express');
 const { UserModel } = require('../db');
 const jwt = require('jsonwebtoken')
 const bcrypt = require ('bcrypt');
-const { JWT_SECRET } = require('../Middleware/userauth');
+const JWT_SECRET  = process.env.JWT_SECRET;
+const {fetchgithubprofiles} = require('../Services')
 
 
 const userRouter = Router();
@@ -73,6 +74,16 @@ userRouter.post('/login', async function (req,res ,next ) {
         console.error("Error during login",err)
         return res.status(500).json({message:" Server Error ! "})
     }
+})
+
+userRouter.get('/github/:username',async function (req,res,next) {
+    const {username}= req.params;
+    const profile = await fetchgithubprofiles(username)
+
+    if (!profile){
+        return res.status(400).json({message:"Profile not found"})
+    }
+    res.json(profile)
 })
 
 module.exports = userRouter
